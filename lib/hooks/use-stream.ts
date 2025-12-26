@@ -55,12 +55,18 @@ export function useStream(
                 if (message.isClosed && message.candle) {
                   // New candle closed, add to array
                   if (message.candle.timestamp > lastCandle.timestamp) {
+                    console.log('📊 New candle closed:', message.candle.close);
                     candles.push(message.candle);
                   }
                 } else if (message.candle) {
                   // Update current candle
                   if (message.candle.timestamp === lastCandle.timestamp) {
+                    console.log('🔄 Updating current candle:', message.candle.close);
                     candles[candles.length - 1] = message.candle;
+                  } else if (message.candle.timestamp > lastCandle.timestamp) {
+                    // Sometimes the first update of a new candle isn't marked as closed
+                    console.log('📊 New candle detected:', message.candle.close);
+                    candles.push(message.candle);
                   }
                 }
 

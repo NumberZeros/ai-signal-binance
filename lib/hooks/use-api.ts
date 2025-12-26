@@ -22,7 +22,8 @@ export function useCandles(symbol: Symbol, timeframe: Timeframe, productType: Bi
         candleCount: number;
       };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always consider data stale to allow updates from SSE
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false,
   });
 }

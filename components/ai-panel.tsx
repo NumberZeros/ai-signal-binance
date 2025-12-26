@@ -3,8 +3,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore } from '@/lib/store/app-store';
+import { motion, AnimatePresence } from 'framer-motion';import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';import { useAppStore } from '@/lib/store/app-store';
 import { useExplainAlert, useMarketSummary, useAIQuery } from '@/lib/hooks/use-api';
 
 interface AIPanelProps {
@@ -156,13 +156,29 @@ export function AIPanel({ alertId }: AIPanelProps) {
             )}
 
             {summaryMutation.data && (
-              <div className="p-4 bg-surface2/60 rounded border border-border space-y-2">
-                <p className="text-sm text-foreground/90 leading-relaxed">
+              <div className="p-4 bg-surface2/60 rounded border border-border prose prose-sm prose-invert max-w-none">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => (
+                      <p className="text-sm text-foreground/90 leading-relaxed mb-3 last:mb-0">{children}</p>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="text-primary font-semibold">{children}</strong>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc list-inside space-y-1 text-sm text-foreground/90">{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal list-inside space-y-1 text-sm text-foreground/90">{children}</ol>
+                    ),
+                    li: ({ children }) => (
+                      <li className="text-foreground/90">{children}</li>
+                    ),
+                  }}
+                >
                   {summaryMutation.data.summary}
-                </p>
-                <p className="text-xs text-muted-foreground italic">
-                  ⚠️ AI-generated for educational purposes only, not financial advice
-                </p>
+                </ReactMarkdown>
               </div>
             )}
 
@@ -211,10 +227,29 @@ export function AIPanel({ alertId }: AIPanelProps) {
             )}
 
             {queryMutation.data && (
-              <div className="p-4 bg-surface2/60 rounded border border-border">
-                <p className="text-sm text-foreground/90 leading-relaxed">
+              <div className="p-4 bg-surface2/60 rounded border border-border prose prose-sm prose-invert max-w-none">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => (
+                      <p className="text-sm text-foreground/90 leading-relaxed mb-3 last:mb-0">{children}</p>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="text-primary font-semibold">{children}</strong>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc list-inside space-y-1 text-sm text-foreground/90">{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal list-inside space-y-1 text-sm text-foreground/90">{children}</ol>
+                    ),
+                    li: ({ children }) => (
+                      <li className="text-foreground/90">{children}</li>
+                    ),
+                  }}
+                >
                   {queryMutation.data.answer}
-                </p>
+                </ReactMarkdown>
               </div>
             )}
 

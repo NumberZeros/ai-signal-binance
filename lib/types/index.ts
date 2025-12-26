@@ -64,21 +64,42 @@ export interface Candle {
 }
 
 export interface IndicatorValues {
+  // Moving Averages
   ema9?: number;
   ema21?: number;
   ema50?: number;
   sma20?: number;
   sma50?: number;
+  
+  // Momentum Oscillators
   rsi?: number;
-  volumeMA?: number;
   macd?: number;
   macdSignal?: number;
   macdHistogram?: number;
+  stochK?: number;
+  stochD?: number;
+  cci?: number;
+  williamsR?: number;
+  stochRSI?: number;
+  
+  // Trend Indicators
+  adx?: number;
+  adxPlusDI?: number;
+  adxMinusDI?: number;
+  psar?: number;
+  psarTrend?: 'bullish' | 'bearish';
+  
+  // Volatility Indicators
+  atr?: number;
   bollingerUpper?: number;
   bollingerMiddle?: number;
   bollingerLower?: number;
-  stochK?: number;
-  stochD?: number;
+  
+  // Volume Indicators
+  volumeMA?: number;
+  mfi?: number;
+  obv?: number;
+  vwap?: number;
 }
 
 export interface CandleWithIndicators extends Candle {
@@ -98,7 +119,17 @@ export type AlertType =
   | 'BOLLINGER_BREAKOUT_UPPER'
   | 'BOLLINGER_BREAKOUT_LOWER'
   | 'STOCHASTIC_OVERBOUGHT'
-  | 'STOCHASTIC_OVERSOLD';
+  | 'STOCHASTIC_OVERSOLD'
+  | 'ADX_STRONG_TREND'
+  | 'ADX_WEAK_TREND'
+  | 'CCI_OVERBOUGHT'
+  | 'CCI_OVERSOLD'
+  | 'WILLIAMS_R_OVERBOUGHT'
+  | 'WILLIAMS_R_OVERSOLD'
+  | 'MFI_OVERBOUGHT'
+  | 'MFI_OVERSOLD'
+  | 'PSAR_REVERSAL_BULLISH'
+  | 'PSAR_REVERSAL_BEARISH';
 
 export interface Alert {
   id: string;

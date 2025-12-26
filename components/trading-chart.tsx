@@ -36,6 +36,8 @@ export function TradingChart({ candles, alerts, config, onAlertClick }: ChartPro
   const indicatorSeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
   const datasetFirstTimestampRef = useRef<number | null>(null);
   const lastCandleCountRef = useRef(0);
+  const lastIndicatorCandleCountRef = useRef(0);
+  const lastIndicatorTimestampRef = useRef<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [lastPrice, setLastPrice] = useState<number | null>(null);
@@ -328,6 +330,8 @@ export function TradingChart({ candles, alerts, config, onAlertClick }: ChartPro
     // Reset dataset tracking for this chart instance
     datasetFirstTimestampRef.current = null;
     lastCandleCountRef.current = 0;
+    lastIndicatorCandleCountRef.current = 0;
+    lastIndicatorTimestampRef.current = null;
     hasMoreHistoryRef.current = true;
 
     // Subscribe to visible logical range changes for infinite scroll
@@ -411,31 +415,43 @@ export function TradingChart({ candles, alerts, config, onAlertClick }: ChartPro
       return;
     }
 
-    // Live updates: update last bar, and append if a new candle arrived
+    // Live updates: check if new candle or updating existing one
     const latest = candles[candles.length - 1];
     const isCandlestickType = config.chartType === 'candlestick' || config.chartType === 'bar';
+    const hasNewCandle = candles.length > prevCount;
     
-    if (isCandlestickType) {
-      mainSeriesRef.current.update(toCandleData(latest));
+    if (hasNewCandle) {
+      // New candle arrived - use setData to refresh entire dataset
+      if (isCandlestickType) {
+        const candleData: CandlestickData[] = candles.map(toCandleData);
+        mainSeriesRef.current.setData(candleData);
+      } else {
+        const lineData: LineData[] = candles.map(toLineData);
+        mainSeriesRef.current.setData(lineData);
+      }
+      const volumeData = candles.map((c) => toVolumeBar(c, success, danger));
+      volumeSeriesRef.current.setData(volumeData);
     } else {
-      mainSeriesRef.current.update(toLineData(latest));
+      // Same candle, just update values
+      if (isCandlestickType) {
+        mainSeriesRef.current.update(toCandleData(latest));
+      } else {
+        mainSeriesRef.current.update(toLineData(latest));
+      }
+      volumeSeriesRef.current.update(toVolumeBar(latest, success, danger));
     }
     
-    volumeSeriesRef.current.update(toVolumeBar(latest, success, danger));
-    
-    // Update last price
-    setLastPrice(latest.close);
-
     // Update last price
     setLastPrice(latest.close);
 
     // Keep chart pinned to real-time while streaming (only in live mode)
-    if (isLiveMode) {
-      chartRef.current?.timeScale().scrollToRealTime();
+    if (isLiveMode && chartRef.current) {
+      // Scroll to the rightmost position (latest candle)
+      chartRef.current.timeScale().scrollToPosition(3, false);
     }
 
     lastCandleCountRef.current = candles.length;
-  }, [mounted, candles, isLiveMode]);
+  }, [mounted, candles, isLiveMode, config.chartType]);
 
   // Create/remove indicator series only when toggles change (not on every tick)
   useEffect(() => {
@@ -482,7 +498,15 @@ export function TradingChart({ candles, alerts, config, onAlertClick }: ChartPro
     if (seriesMap.size === 0) return;
 
     const firstTimestamp = candles[0].timestamp;
+    const latestCandle = candles[candles.length - 1];
+    const latestTimestamp = latestCandle.timestamp;
     const isNewDataset = datasetFirstTimestampRef.current !== firstTimestamp;
+    
+    // Use separate refs to avoid race condition with main candles useEffect
+    const prevIndicatorCount = lastIndicatorCandleCountRef.current;
+    const prevIndicatorTimestamp = lastIndicatorTimestampRef.current;
+    const hasNewCandle = candles.length > prevIndicatorCount || 
+                         (prevIndicatorTimestamp !== null && latestTimestamp > prevIndicatorTimestamp);
 
     const setFull = (key: string, selector: (c: CandleWithIndicators) => number | undefined) => {
       const series = seriesMap.get(key);
@@ -496,29 +520,33 @@ export function TradingChart({ candles, alerts, config, onAlertClick }: ChartPro
       series.setData(data);
     };
 
-    const updateLatest = (key: string, value: number | undefined) => {
-      const series = seriesMap.get(key);
-      if (!series || value === undefined) return;
-      const latest = candles[candles.length - 1];
-      series.update({
-        time: Math.floor(latest.timestamp / 1000) as UTCTimestamp,
-        value,
-      });
-    };
-
-    if (isNewDataset) {
+    // Always use setData for new datasets or new candles to avoid timestamp conflicts
+    if (isNewDataset || hasNewCandle || prevIndicatorCount === 0) {
       setFull('ema9', (c) => c.indicators.ema9);
       setFull('ema21', (c) => c.indicators.ema21);
       setFull('ema50', (c) => c.indicators.ema50);
       setFull('sma20', (c) => c.indicators.sma20);
+      
+      // Update tracking refs
+      lastIndicatorCandleCountRef.current = candles.length;
+      lastIndicatorTimestampRef.current = latestTimestamp;
       return;
     }
 
-    const latestIndicators = candles[candles.length - 1].indicators;
-    updateLatest('ema9', latestIndicators.ema9);
-    updateLatest('ema21', latestIndicators.ema21);
-    updateLatest('ema50', latestIndicators.ema50);
-    updateLatest('sma20', latestIndicators.sma20);
+    // Only use update when we're updating the same candle (same timestamp and count)
+    if (latestTimestamp === prevIndicatorTimestamp) {
+      const latestIndicators = latestCandle.indicators;
+      
+      // Use setData for each indicator to be safe
+      setFull('ema9', (c) => c.indicators.ema9);
+      setFull('ema21', (c) => c.indicators.ema21);
+      setFull('ema50', (c) => c.indicators.ema50);
+      setFull('sma20', (c) => c.indicators.sma20);
+    }
+    
+    // Update tracking refs
+    lastIndicatorCandleCountRef.current = candles.length;
+    lastIndicatorTimestampRef.current = latestTimestamp;
   }, [mounted, candles]);
 
   // Add alert markers

@@ -69,32 +69,67 @@ export const ALERT_DEDUPLICATION_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
 // Indicator periods
 export const INDICATOR_PERIODS = {
+  // Moving Averages
   EMA_FAST: 9,
   EMA_MID: 21,
   EMA_SLOW: 50,
   SMA_SHORT: 20,
   SMA_LONG: 50,
+  
+  // Momentum Indicators
   RSI: 14,
-  VOLUME_MA: 20,
   MACD_FAST: 12,
   MACD_SLOW: 26,
   MACD_SIGNAL: 9,
-  BOLLINGER_PERIOD: 20,
-  BOLLINGER_STD_DEV: 2,
   STOCHASTIC_K: 14,
   STOCHASTIC_D: 3,
+  CCI: 20,
+  WILLIAMS_R: 14,
+  STOCH_RSI: 14,
+  STOCH_RSI_K: 3,
+  STOCH_RSI_D: 3,
+  
+  // Trend Indicators
+  ADX: 14,
+  PSAR_STEP: 0.02,
+  PSAR_MAX: 0.2,
+  
+  // Volatility Indicators
+  ATR: 14,
+  BOLLINGER_PERIOD: 20,
+  BOLLINGER_STD_DEV: 2,
+  
+  // Volume Indicators
+  VOLUME_MA: 20,
+  MFI: 14,
 } as const;
 
 // RSI thresholds
 export const RSI_OVERBOUGHT = 70;
 export const RSI_OVERSOLD = 30;
 
-// Volume spike threshold (multiple of average)
-export const VOLUME_SPIKE_MULTIPLIER = 2.0;
-
 // Stochastic thresholds
 export const STOCHASTIC_OVERBOUGHT = 80;
 export const STOCHASTIC_OVERSOLD = 20;
+
+// CCI thresholds
+export const CCI_OVERBOUGHT = 100;
+export const CCI_OVERSOLD = -100;
+
+// Williams %R thresholds
+export const WILLIAMS_R_OVERBOUGHT = -20;
+export const WILLIAMS_R_OVERSOLD = -80;
+
+// MFI (Money Flow Index) thresholds
+export const MFI_OVERBOUGHT = 80;
+export const MFI_OVERSOLD = 20;
+
+// ADX thresholds
+export const ADX_STRONG_TREND = 25;
+export const ADX_VERY_STRONG_TREND = 50;
+
+// Volume spike threshold (multiple of average)
+export const VOLUME_SPIKE_MULTIPLIER = 2.0;
 
 // Timeframe to milliseconds mapping
 export const TIMEFRAME_MS: Record<string, number> = {

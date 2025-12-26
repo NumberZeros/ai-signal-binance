@@ -139,6 +139,209 @@ describe('New Technical Indicators', () => {
     });
   });
 
+  describe('ADX (Average Directional Index)', () => {
+    it('should calculate ADX values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.adx).toBeDefined();
+      expect(lastCandle.indicators.adxPlusDI).toBeDefined();
+      expect(lastCandle.indicators.adxMinusDI).toBeDefined();
+    });
+
+    it('should have ADX between 0 and 100', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { adx } = lastCandle.indicators;
+
+      if (adx !== undefined) {
+        expect(adx).toBeGreaterThanOrEqual(0);
+        expect(adx).toBeLessThanOrEqual(100);
+      }
+    });
+
+    it('should have directional indicators as positive numbers', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { adxPlusDI, adxMinusDI } = lastCandle.indicators;
+
+      if (adxPlusDI !== undefined) {
+        expect(adxPlusDI).toBeGreaterThanOrEqual(0);
+      }
+      if (adxMinusDI !== undefined) {
+        expect(adxMinusDI).toBeGreaterThanOrEqual(0);
+      }
+    });
+  });
+
+  describe('ATR (Average True Range)', () => {
+    it('should calculate ATR values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.atr).toBeDefined();
+    });
+
+    it('should have ATR as positive number', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { atr } = lastCandle.indicators;
+
+      if (atr !== undefined) {
+        expect(atr).toBeGreaterThan(0);
+      }
+    });
+  });
+
+  describe('PSAR (Parabolic SAR)', () => {
+    it('should calculate PSAR values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.psar).toBeDefined();
+      expect(lastCandle.indicators.psarTrend).toBeDefined();
+    });
+
+    it('should have PSAR trend as bullish or bearish', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { psarTrend } = lastCandle.indicators;
+
+      if (psarTrend !== undefined) {
+        expect(['bullish', 'bearish']).toContain(psarTrend);
+      }
+    });
+  });
+
+  describe('CCI (Commodity Channel Index)', () => {
+    it('should calculate CCI values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.cci).toBeDefined();
+    });
+
+    it('should have CCI as number (unbounded)', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { cci } = lastCandle.indicators;
+
+      if (cci !== undefined) {
+        expect(typeof cci).toBe('number');
+        expect(isFinite(cci)).toBe(true);
+      }
+    });
+  });
+
+  describe('Williams %R', () => {
+    it('should calculate Williams %R values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.williamsR).toBeDefined();
+    });
+
+    it('should have Williams %R between -100 and 0', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { williamsR } = lastCandle.indicators;
+
+      if (williamsR !== undefined) {
+        expect(williamsR).toBeGreaterThanOrEqual(-100);
+        expect(williamsR).toBeLessThanOrEqual(0);
+      }
+    });
+  });
+
+  describe('Stochastic RSI', () => {
+    it('should calculate Stochastic RSI values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.stochRSI).toBeDefined();
+    });
+
+    it('should have Stochastic RSI between 0 and 1', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { stochRSI } = lastCandle.indicators;
+
+      if (stochRSI !== undefined) {
+        expect(stochRSI).toBeGreaterThanOrEqual(0);
+        expect(stochRSI).toBeLessThanOrEqual(1);
+      }
+    });
+  });
+
+  describe('MFI (Money Flow Index)', () => {
+    it('should calculate MFI values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.mfi).toBeDefined();
+    });
+
+    it('should have MFI between 0 and 100', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { mfi } = lastCandle.indicators;
+
+      if (mfi !== undefined) {
+        expect(mfi).toBeGreaterThanOrEqual(0);
+        expect(mfi).toBeLessThanOrEqual(100);
+      }
+    });
+  });
+
+  describe('OBV (On Balance Volume)', () => {
+    it('should calculate OBV values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      // OBV should be defined, even if it starts from first candle
+      expect(lastCandle.indicators.obv).toBeDefined();
+    });
+
+    it('should have OBV as number', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { obv } = lastCandle.indicators;
+
+      if (obv !== undefined) {
+        expect(typeof obv).toBe('number');
+      }
+    });
+
+    it('should show cumulative volume trend', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      
+      // OBV should be defined for all candles since it calculates from first
+      const validOBV = result.filter(c => c.indicators.obv !== undefined);
+      expect(validOBV.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('VWAP (Volume Weighted Average Price)', () => {
+    it('should calculate VWAP values', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+
+      expect(lastCandle.indicators.vwap).toBeDefined();
+    });
+
+    it('should have VWAP as positive number close to price', () => {
+      const result = indicatorCalculator.calculateIndicators(mockCandles);
+      const lastCandle = result[result.length - 1];
+      const { vwap } = lastCandle.indicators;
+
+      if (vwap !== undefined) {
+        expect(vwap).toBeGreaterThan(0);
+        // VWAP should be reasonably close to current price
+        expect(Math.abs(vwap - lastCandle.close)).toBeLessThan(lastCandle.close * 0.5);
+      }
+    });
+  });
+
   describe('All Indicators Integration', () => {
     it('should calculate all indicators including new ones', () => {
       const result = indicatorCalculator.calculateIndicators(mockCandles);
@@ -160,6 +363,20 @@ describe('New Technical Indicators', () => {
       expect(lastCandle.indicators).toHaveProperty('bollingerLower');
       expect(lastCandle.indicators).toHaveProperty('stochK');
       expect(lastCandle.indicators).toHaveProperty('stochD');
+      
+      // New indicators
+      expect(lastCandle.indicators).toHaveProperty('adx');
+      expect(lastCandle.indicators).toHaveProperty('adxPlusDI');
+      expect(lastCandle.indicators).toHaveProperty('adxMinusDI');
+      expect(lastCandle.indicators).toHaveProperty('atr');
+      expect(lastCandle.indicators).toHaveProperty('psar');
+      expect(lastCandle.indicators).toHaveProperty('psarTrend');
+      expect(lastCandle.indicators).toHaveProperty('cci');
+      expect(lastCandle.indicators).toHaveProperty('williamsR');
+      expect(lastCandle.indicators).toHaveProperty('stochRSI');
+      expect(lastCandle.indicators).toHaveProperty('mfi');
+      expect(lastCandle.indicators).toHaveProperty('obv');
+      expect(lastCandle.indicators).toHaveProperty('vwap');
     });
 
     it('should maintain consistency when updating with new candle', () => {
@@ -183,6 +400,8 @@ describe('New Technical Indicators', () => {
       expect(lastCandle.indicators.macd).toBeDefined();
       expect(lastCandle.indicators.bollingerUpper).toBeDefined();
       expect(lastCandle.indicators.stochK).toBeDefined();
+      expect(lastCandle.indicators.adx).toBeDefined();
+      expect(lastCandle.indicators.mfi).toBeDefined();
     });
   });
 });
