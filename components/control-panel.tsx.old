@@ -1,0 +1,183 @@
+// Control panel for symbol, timeframe, and indicator toggles
+
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Symbol, Timeframe } from '@/lib/types';
+import { useAppStore } from '@/lib/store/app-store';
+
+const TIMEFRAMES: Timeframe[] = [
+  '1s',
+  '1m',
+  '3m',
+  '5m',
+  '15m',
+  '30m',
+  '1h',
+  '2h',
+  '4h',
+  '6h',
+  '8h',
+  '12h',
+  '1d',
+  '3d',
+  '1w',
+  '1M',
+];
+
+export function ControlPanel() {
+  const {
+    selectedSymbol,
+    selectedTimeframe,
+    chartConfig,
+    isStreaming,
+    setSymbol,
+    setTimeframe,
+    updateChartConfig,
+  } = useAppStore();
+
+  const [symbols, setSymbols] = useState<string[]>([]);
+  const [loadingSymbols, setLoadingSymbols] = useState(true);
+
+  // Fetch popular symbols on mount
+  useEffect(() => {
+    async function fetchSymbols() {
+      try {
+        const response = await fetch('/api/symbols?filter=popular');
+        const data = await response.json();
+        setSymbols(data.symbols || []);
+      } catch (error) {
+        console.error('Failed to fetch symbols:', error);
+        // Fallback to hardcoded popular symbols
+        setSymbols(['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT']);
+      } finally {
+        setLoadingSymbols(false);
+      }
+    }
+    fetchSymbols();
+  }, []);
+
+  return (
+    <div className="p-4 bg-surface border border-border/80 rounded-xl shadow-lg shadow-black/20 space-y-4">
+      <div className="flex flex-wrap gap-4">
+        {/* Symbol Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Symbol</label>
+          <select
+            value={selectedSymbol}
+            onChange={(e) => setSymbol(e.target.value as Symbol)}
+            disabled={isStreaming || loadingSymbols}
+            className="px-3 py-2 bg-surface2 border border-border/80 rounded text-sm disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/35 hover:border-primary/50"
+          >
+            {loadingSymbols ? (
+              <option>Loading...</option>
+            ) : (
+              symbols.map((symbol) => (
+                <option key={symbol} value={symbol}>
+                  {symbol}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
+        {/* Timeframe Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Timeframe</label>
+          <select
+            value={selectedTimeframe}
+            onChange={(e) => setTimeframe(e.target.value as Timeframe)}
+            disabled={isStreaming}
+            className="px-3 py-2 bg-surface2 border border-border/80 rounded text-sm disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/35 hover:border-primary/50"
+          >
+            {TIMEFRAMES.map((tf) => (
+              <option key={tf} value={tf}>
+                {tf}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Streaming Status */}
+        <div className="flex items-end">
+          <div className="flex items-center gap-2 px-3 py-2 bg-surface2 border border-border/80 rounded">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                isStreaming ? 'bg-success animate-pulse' : 'bg-muted-foreground/60'
+              }`}
+            />
+            <span className="text-sm text-muted-foreground">
+              {isStreaming ? 'Live' : 'Offline'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Indicator Toggles */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-muted-foreground">Indicators</label>
+        <div className="flex flex-wrap gap-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={chartConfig.showEMA9}
+              onChange={(e) => updateChartConfig({ showEMA9: e.target.checked })}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm text-foreground/90">EMA 9</span>
+          </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={chartConfig.showEMA21}
+              onChange={(e) => updateChartConfig({ showEMA21: e.target.checked })}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm text-foreground/90">EMA 21</span>
+          </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={chartConfig.showEMA50}
+              onChange={(e) => updateChartConfig({ showEMA50: e.target.checked })}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm text-foreground/90">EMA 50</span>
+          </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={chartConfig.showSMA20}
+              onChange={(e) => updateChartConfig({ showSMA20: e.target.checked })}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm text-foreground/90">SMA 20</span>
+          </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={chartConfig.showVolume}
+              onChange={(e) => updateChartConfig({ showVolume: e.target.checked })}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm text-foreground/90">Volume</span>
+          </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={chartConfig.showAlerts}
+              onChange={(e) => updateChartConfig({ showAlerts: e.target.checked })}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm text-foreground/90">Alerts</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
